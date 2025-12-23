@@ -1,0 +1,5 @@
+{
+  "name": "Python CAP Tutor AI",
+  "description": "A specialized AI chat assistant focused strictly on Dr. Ahmed Alia's Computer Science Apprenticeship (CAP) Python curriculum, covering basics, control flow, collections, functions, NumPy, and Probability distributions.",
+  "requestFramePermissions": []
+}
