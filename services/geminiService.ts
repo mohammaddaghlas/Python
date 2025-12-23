@@ -6,7 +6,20 @@ let ai: GoogleGenAI | null = null;
 
 const getAIClient = () => {
   if (!ai) {
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Safety check for process.env in case code runs in browser without polyfills
+    const apiKey = (typeof process !== 'undefined' && process.env) 
+      ? process.env.API_KEY 
+      : undefined;
+
+    if (!apiKey) {
+      console.warn("API Key not found in process.env");
+    }
+    
+    // We attempt to initialize even if key is missing, to allow the error to be caught later
+    // rather than crashing the app initialization.
+    if (apiKey) {
+        ai = new GoogleGenAI({ apiKey });
+    }
   }
   return ai;
 };
@@ -17,6 +30,19 @@ export const sendMessageToGemini = async (
 ): Promise<string> => {
   try {
     const client = getAIClient();
+    
+    if (!client) {
+        // Double check if key exists now (in case it was injected late) or throw clear error
+        const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
+        if (!apiKey) {
+             return "Error: API Key configuration missing. Please ensure API_KEY is set in your environment variables.";
+        }
+        ai = new GoogleGenAI({ apiKey });
+    }
+    
+    // If we still don't have a client, something is wrong
+    if (!ai) return "Error: Could not initialize AI client.";
+
     const model = "gemini-3-flash-preview";
     
     // Construct the conversation history for context
@@ -37,7 +63,7 @@ export const sendMessageToGemini = async (
       Tutor:
     `;
 
-    const response = await client.models.generateContent({
+    const response = await ai.models.generateContent({
       model: model,
       contents: [
         {
