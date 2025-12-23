@@ -27,7 +27,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               code(props: any) {
                 const {children, className, node, ...rest} = props
                 const match = /language-(\w+)/.exec(className || '')
-                const isInline = !match && !String(children).includes('\n');
+                
+                // Safer check for inline code vs block code
+                const contentText = String(children).replace(/\n$/, '');
+                const hasNewLine = contentText.includes('\n');
+                const isInline = !match && !hasNewLine;
                 
                 return !isInline ? (
                   <div className="my-4 rounded-lg overflow-hidden border border-gray-700/50 shadow-sm bg-[#1e1e1e]" dir="ltr">

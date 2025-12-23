@@ -2,14 +2,21 @@ import { GoogleGenAI } from "@google/genai";
 import { COURSE_CONTENT } from "../constants";
 import { Message, Sender } from "../types";
 
-// Initialize the client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let ai: GoogleGenAI | null = null;
+
+const getAIClient = () => {
+  if (!ai) {
+    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return ai;
+};
 
 export const sendMessageToGemini = async (
   history: Message[],
   newMessage: string
 ): Promise<string> => {
   try {
+    const client = getAIClient();
     const model = "gemini-3-flash-preview";
     
     // Construct the conversation history for context
@@ -30,7 +37,7 @@ export const sendMessageToGemini = async (
       Tutor:
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: model,
       contents: [
         {
